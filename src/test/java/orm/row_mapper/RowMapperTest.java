@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import orm.dsl.QueryBuilder;
 import persistence.sql.ddl.Person;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static steps.Steps.테이블_생성;
 
 class RowMapperTest extends PluggableH2test {

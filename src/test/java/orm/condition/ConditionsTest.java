@@ -6,6 +6,8 @@ import orm.dsl.condition.Conditions;
 import orm.dsl.condition.EqualCondition;
 import orm.dsl.condition.NoCondition;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ConditionsTest {
 
     @Test

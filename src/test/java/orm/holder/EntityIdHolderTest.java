@@ -7,6 +7,7 @@ import orm.dsl.holder.EntityIdHolder;
 import orm.exception.InvalidIdMappingException;
 import persistence.sql.ddl.Person;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EntityIdHolderTest {
