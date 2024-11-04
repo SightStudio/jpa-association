@@ -8,6 +8,7 @@ import orm.exception.EntityHasNoDefaultConstructorException;
 import orm.exception.InvalidEntityException;
 import orm.exception.InvalidIdMappingException;
 import orm.settings.JpaSettings;
+import orm.util.ReflectionUtils;
 import orm.validator.EntityValidator;
 
 import java.lang.reflect.Constructor;
@@ -171,18 +172,7 @@ public class TableEntity<E> {
 
         for (Field declaredField : tableClass.getDeclaredFields()) {
             var fieldValue = classFieldNameMap.get(declaredField.getName());
-            setFieldValue(declaredField, fieldValue);
-        }
-    }
-
-    private void setFieldValue(Field declaredField, Object fieldValue) {
-        declaredField.setAccessible(true);
-        try {
-            if (fieldValue != null) {
-                declaredField.set(entity, fieldValue);
-            }
-        } catch (IllegalAccessException e) {
-            logger.error("Cannot access field: " + declaredField.getName(), e);
+            ReflectionUtils.setFieldValue(declaredField, entity, fieldValue);
         }
     }
 

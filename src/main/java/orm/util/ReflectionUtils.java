@@ -1,5 +1,8 @@
 package orm.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import orm.TableEntity;
 import orm.exception.ReflectionException;
 
 import java.lang.reflect.Field;
@@ -9,6 +12,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ReflectionUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReflectionUtils.class);
 
     /**
      * 리플랙션을 통해 필드를 복사해서 새로운 객체를 생성한다.
@@ -36,6 +41,17 @@ public class ReflectionUtils {
             return (T) newObject;
         } catch (Exception e) {
             throw new ReflectionException("Failed to deep copy object", e);
+        }
+    }
+
+    public static void setFieldValue(Field declaredField, Object entity, Object fieldValue) {
+        declaredField.setAccessible(true);
+        try {
+            if (fieldValue != null) {
+                declaredField.set(entity, fieldValue);
+            }
+        } catch (IllegalAccessException e) {
+            logger.error("Cannot access field: " + declaredField.getName(), e);
         }
     }
 }
