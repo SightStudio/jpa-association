@@ -55,11 +55,6 @@ public abstract class SelectImpl<E> implements SelectFromStep<E>{
     }
 
     @Override
-    public List<E> fetch(RowMapper<E> rowMapper) {
-        return queryRunner.fetch(extractSql(), rowMapper);
-    }
-
-    @Override
     public E fetchOne(RowMapper<E> rowMapper) {
         return queryRunner.fetchOne(extractSql(), rowMapper);
     }
@@ -85,7 +80,6 @@ public abstract class SelectImpl<E> implements SelectFromStep<E>{
 
     @Override
     public List<E> fetch() {
-        throw new NotYetImplementedException("아직 구현 안되었습니다. 2-2에 진행");
-//        return List.of();
+        return queryRunner.fetch(extractSql(), new DefaultRowMapper<>(tableEntity));
     }
 }

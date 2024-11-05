@@ -95,7 +95,7 @@ class QueryBuilderSelectTest extends PluggableH2test {
             // when
             Person person = queryBuilder.selectFrom(Person.class, queryRunner)
                     .where(eq("id", 1L))
-                    .fetchOne(new PersonRowMapper());
+                    .fetchOne();
 
             // then
             assertThat(person).hasNoNullFieldsOrPropertiesExcept("id", "name", "age");
@@ -113,7 +113,7 @@ class QueryBuilderSelectTest extends PluggableH2test {
             Person_엔티티_생성(queryRunner, newPerson);
             // when
             Person person = queryBuilder.selectFrom(Person.class, queryRunner).findById(1L)
-                    .fetchOne(new PersonRowMapper());
+                    .fetchOne();
 
             // then
             assertThat(person).hasNoNullFieldsOrPropertiesExcept("id", "name", "age")
@@ -133,7 +133,7 @@ class QueryBuilderSelectTest extends PluggableH2test {
 
             // when
             List<Person> people = queryBuilder.selectFrom(Person.class, queryRunner).findAll()
-                    .fetch(new PersonRowMapper());
+                    .fetch();
 
             // then
             assertThat(people).asList()

@@ -98,7 +98,7 @@ class QueryBuilderUpdateTest extends PluggableH2test {
 
             List<Person> people = queryBuilder.selectFrom(Person.class, queryRunner)
                     .findAll()
-                    .fetch(new PersonRowMapper());
+                    .fetch();
 
             // then
             assertThat(people).asList().hasSize(0);
