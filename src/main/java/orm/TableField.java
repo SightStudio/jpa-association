@@ -21,14 +21,12 @@ public class TableField {
 
     private final ColumnMeta columnMeta;
 
-    private final JpaSettings jpaSettings;
     private Object fieldValue;
 
     public <T> TableField(Field field, T entity, JpaSettings jpaSettings) {
         Column column = field.getAnnotation(Column.class);
-        this.jpaSettings = jpaSettings;
         this.field = field;
-        this.fieldName = extractFieldName(column, field);
+        this.fieldName = extractFieldName(column, field, jpaSettings);
         this.classFieldName = field.getName();
         this.fieldValue = extractFieldValue(field, entity);
         this.columnMeta = ColumnMeta.from(column);
@@ -62,7 +60,7 @@ public class TableField {
         return false;
     }
 
-    private String extractFieldName(Column column, Field field) {
+    private String extractFieldName(Column column, Field field, JpaSettings jpaSettings) {
         return jpaSettings.getNamingStrategy().namingColumn(column, field);
     }
 

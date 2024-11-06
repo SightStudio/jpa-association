@@ -3,11 +3,13 @@ package orm;
 import jakarta.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import orm.assosiation.RelationPath;
 import orm.dsl.holder.EntityIdHolder;
 import orm.exception.EntityHasNoDefaultConstructorException;
 import orm.exception.InvalidEntityException;
 import orm.exception.InvalidIdMappingException;
 import orm.settings.JpaSettings;
+import orm.util.CollectionUtils;
 import orm.util.ReflectionUtils;
 import orm.validator.EntityValidator;
 
@@ -32,40 +34,41 @@ public class TableEntity<E> {
     private final String tableName;
 
     private final E entity;
-    private final Class<E> tableClass;
+    private final Class<?> tableClass;
+    private final JpaSettings jpaSettings;
 
+    // 테이블의 ID 필드
     private final TablePrimaryField id;
 
-    private final List<TableField> allFields;
+    // 테이블의 모든 필드 (연관관계 제외)
+    private final TableFields<E> tableFields;
 
-    // allFields 중 변경된 필드를 추적하기 위한 BitSet
-    private final BitSet changedFields;
-
-    private final JpaSettings jpaSettings;
+    // 연관관계
+    private final List<RelationPath> relationPathList;
 
     public TableEntity(Class<E> entityClass, JpaSettings settings) {
         this.entity = createNewInstanceByDefaultConstructor(entityClass);
         new EntityValidator<>(entity).validate();
 
         this.id = extractId(settings);
-        this.tableName = extractTableName(entityClass, settings);
-        this.jpaSettings = settings;
         this.tableClass = entityClass;
-        this.allFields = extractAllPersistenceFields(entityClass, settings);
-        this.changedFields = new BitSet(allFields.size());
+        this.tableName = extractTableName(tableClass, settings);
+
+        this.jpaSettings = settings;
+        this.tableFields = new TableFields<>(entity, settings);
+        this.relationPathList = new ArrayList<>();
     }
 
     public TableEntity(E entity, JpaSettings settings) {
         this.entity = entity;
         new EntityValidator<>(entity).validate();
 
-        Class<E> entityClass = (Class<E>) entity.getClass();
         this.id = extractId(settings);
-        this.tableName = extractTableName(entityClass, settings);
+        this.tableClass = entity.getClass();
+        this.tableName = extractTableName(tableClass, settings);
         this.jpaSettings = settings;
-        this.tableClass = entityClass;
-        this.allFields = extractAllPersistenceFields(entityClass, settings);
-        this.changedFields = new BitSet(allFields.size());
+        this.tableFields = new TableFields<>(entity, settings);
+        this.relationPathList = new ArrayList<>();
     }
 
     public TableEntity(Class<E> entityClass) {
@@ -93,7 +96,7 @@ public class TableEntity<E> {
     }
 
     public void markFieldChanged(int index) {
-        changedFields.set(index, true);
+        tableFields.setFieldChanged(index, true);
     }
 
     public boolean hasDbGeneratedId() {
@@ -112,32 +115,21 @@ public class TableEntity<E> {
 
     // id 제외 모든 컬럼
     public List<TableField> getNonIdFields() {
-        return allFields.stream()
-                .filter(field -> !field.isId())
-                .toList();
+        return tableFields.getNonIdFields();
     }
 
     // 변경된 컬럼만 리턴
     public List<TableField> getChangeFields() {
-        List<TableField> allFields = this.allFields;
-        List<TableField> result = new ArrayList<>(allFields.size());
-
-        for (int i = 0; i < allFields.size(); i++) {
-            if (this.changedFields.get(i)) {
-                result.add(allFields.get(i));
-            }
-        }
-
-        return result;
+        return tableFields.getChangedFields();
     }
 
     // id를 포함 모든 컬럼
     public List<TableField> getAllFields() {
-        return allFields;
+        return tableFields.getAllFields();
     }
 
     public Class<E> getTableClass() {
-        return tableClass;
+        return (Class<E>) tableClass;
     }
 
     public E getEntity() {
@@ -147,16 +139,10 @@ public class TableEntity<E> {
     /**
      * 모든 필드를 주어진 필드로 교체한다.
      *
-     * @param tableFields 교체할 필드
+     * @param newTableFields 교체할 필드
      */
-    public void replaceAllFields(List<? extends TableField> tableFields) {
-        Map<String, Object> fieldValueMap = tableFields.stream()
-                .collect(Collectors.toMap(TableField::getFieldName, TableField::getFieldValue));
-
-        for (TableField field : allFields) {
-            Object fieldValue = fieldValueMap.get(field.getFieldName());
-            field.setFieldValue(fieldValue);
-        }
+    public void replaceAllFields(List<? extends TableField> newTableFields) {
+        tableFields.replaceAllFields(newTableFields);
     }
 
     /**
@@ -176,6 +162,10 @@ public class TableEntity<E> {
         }
     }
 
+    public boolean hasJoinPath() {
+        return CollectionUtils.isNotEmpty(relationPathList);
+    }
+
     private E createNewInstanceByDefaultConstructor(Class<E> entityClass) {
         try {
             Constructor<E> defaultConstructor = entityClass.getDeclaredConstructor();
@@ -189,7 +179,7 @@ public class TableEntity<E> {
         }
     }
 
-    private String extractTableName(Class<E> entityClass, JpaSettings settings) {
+    private String extractTableName(Class<?> entityClass, JpaSettings settings) {
         return settings.getNamingStrategy().namingTable(entityClass);
     }
 
@@ -205,36 +195,7 @@ public class TableEntity<E> {
         return new TablePrimaryField(idField, entity, settings);
     }
 
-    /**
-     * 모든 영속성 필드 추출
-     *
-     * @param entityClass 엔티티 클래스
-     * @return List<TableField> 모든 영속성 필드
-     */
-    private List<TableField> extractAllPersistenceFields(Class<E> entityClass, JpaSettings settings) {
-        Field[] declaredFields = entityClass.getDeclaredFields();
-
-        List<TableField> list = new ArrayList<>(declaredFields.length);
-        for (Field declaredField : declaredFields) {
-            boolean transientAnnotated = declaredField.isAnnotationPresent(Transient.class);
-            boolean columnAnnotated = declaredField.isAnnotationPresent(Column.class);
-            boolean idAnnotated = declaredField.isAnnotationPresent(Id.class);
-
-            if (transientAnnotated && columnAnnotated) {
-                throw new InvalidEntityException(String.format(
-                        "class %s @Transient & @Column cannot be used in same field"
-                        , entityClass.getName())
-                );
-            }
-
-            if (!transientAnnotated) {
-                list.add(
-                        idAnnotated
-                                ? new TablePrimaryField(declaredField, entity, settings)
-                                : new TableField(declaredField, entity, settings)
-                );
-            }
-        }
-        return list;
+    public <T> void addJoinPath(T associatedEntity) {
+//        joinPathList.add(joinPath);
     }
 }
