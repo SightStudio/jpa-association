@@ -8,7 +8,7 @@ import orm.settings.JpaSettings;
 
 import java.lang.reflect.Field;
 
-import static orm.util.ReflectionUtils.extractGenericSignatureFromList;
+import static orm.util.ReflectionUtils.extractGenericSignature;
 
 public class RelationField {
 
@@ -29,7 +29,7 @@ public class RelationField {
     }
 
     public static RelationField ofOneToManyRelation(Field field, JpaSettings settings) {
-        var tableEntity = new TableEntity<>(extractGenericSignatureFromList(field), settings)
+        var tableEntity = new TableEntity<>(extractGenericSignature(field), settings)
                 .addAliasIfNotAssigned();
 
         OneToMany oneToMany = field.getAnnotation(OneToMany.class);

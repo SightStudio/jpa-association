@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * 조인절이 있는 SELECT 쿼리를 생성용
+ */
 public class WithJoinQueryRenderer<E> extends SelectRenderer<E> {
 
     public WithJoinQueryRenderer(TableEntity<E> tableEntity, Conditions conditions, RelationFields relationFields) {

@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 연관관계 없는 row에 대한 매퍼클래스
+ */
 public class SimpleRowMapper<T> implements RowMapper<T> {
 
     private final Class<T> type;

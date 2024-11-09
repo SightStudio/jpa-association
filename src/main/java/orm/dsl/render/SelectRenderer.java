@@ -4,6 +4,9 @@ import orm.TableEntity;
 import orm.assosiation.RelationFields;
 import orm.dsl.condition.Conditions;
 
+/**
+ * SELECT 쿼리 렌더링용 추상 클래스
+ */
 public abstract class SelectRenderer<E> {
 
     protected final TableEntity<E> tableEntity;

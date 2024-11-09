@@ -5,6 +5,9 @@ import orm.assosiation.RelationFields;
 import orm.dsl.QueryRenderer;
 import orm.dsl.condition.Conditions;
 
+/**
+ * 조인절 없이 단순한 SELECT 쿼리를 생성용
+ */
 public class SimpleSelectRenderer<E> extends SelectRenderer<E> {
 
     public SimpleSelectRenderer(TableEntity<E> tableEntity, Conditions conditions) {

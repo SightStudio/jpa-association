@@ -1,7 +1,6 @@
 package orm.row_mapper;
 
 import jdbc.RowMapper;
-import org.jetbrains.annotations.NotNull;
 import orm.EntityFieldProperty;
 import orm.TableEntity;
 import orm.TableField;
@@ -110,7 +109,7 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
                 relationField.set(rootEntity, list);
             }
 
-            Class<?> relationClass = ReflectionUtils.extractGenericSignatureFromList(relationField);
+            Class<?> relationClass = ReflectionUtils.extractGenericSignature(relationField);
             Object relationEntity = createRelationEntityInstance(rs, relationClass);
             list.add(relationEntity);
         } catch (IllegalAccessException e) {

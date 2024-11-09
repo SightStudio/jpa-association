@@ -2,7 +2,6 @@ package orm.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import orm.TableEntity;
 import orm.exception.ReflectionException;
 
 import java.lang.reflect.Field;
@@ -57,7 +56,8 @@ public class ReflectionUtils {
         }
     }
 
-    public static Class<?> extractGenericSignatureFromList(Field field) {
+    // 필드의 제네릭 타입에서 실제 타입을 추출한다.
+    public static Class<?> extractGenericSignature(Field field) {
         Type genericType = field.getGenericType();
         if (!(genericType instanceof ParameterizedType parameterizedType)) {
             return null;
