@@ -84,10 +84,8 @@ class QueryBuilderSelectTest extends PluggableH2test {
     @Test
     @DisplayName("SELECT 절 실제 쿼리 실행 테스트")
     void DQL_SELECT_실제_쿼리_실행() {
-        runInH2Db((queryRunner) -> {
+        runInH2Db((queryRunner, queryBuilder) -> {
             // given
-            QueryBuilder queryBuilder = new QueryBuilder();
-
             Person newPerson = new Person(1L, 30, "설동민");
             테이블_생성(queryRunner, Person.class);
             Person_엔티티_생성(queryRunner, newPerson);
@@ -105,9 +103,8 @@ class QueryBuilderSelectTest extends PluggableH2test {
     @Test
     @DisplayName("SELECT 절 실제 쿼리 실행 테스트 - findById()")
     void findById_실헹() {
-        runInH2Db((queryRunner) -> {
+        runInH2Db((queryRunner, queryBuilder) -> {
             // given
-            QueryBuilder queryBuilder = new QueryBuilder();
             Person newPerson = new Person(1L, 30, "설동민");
             테이블_생성(queryRunner, Person.class);
             Person_엔티티_생성(queryRunner, newPerson);
@@ -124,9 +121,8 @@ class QueryBuilderSelectTest extends PluggableH2test {
     @Test
     @DisplayName("SELECT 절 실제 쿼리 실행 테스트 - findByAll()")
     void findAll_실행() {
-        runInH2Db((queryRunner) -> {
+        runInH2Db((queryRunner, queryBuilder) -> {
             // given
-            QueryBuilder queryBuilder = new QueryBuilder();
             테이블_생성(queryRunner, Person.class);
             Person_엔티티_생성(queryRunner, new Person(1L, 30, "설동민"));
             Person_엔티티_생성(queryRunner, new Person(2L, 30, "설동민2"));
@@ -144,7 +140,7 @@ class QueryBuilderSelectTest extends PluggableH2test {
 
     @Test
     @DisplayName("JOIN 절이 포함된 SELECT 절 쿼리빌더 테스트")
-    void join_절_생성_테스트() {
+    void select_join_절_생성_테스트() {
 
         // given
         var queryStep = queryBuilder.selectFrom(Order.class, fakeQueryRunner)
@@ -167,4 +163,25 @@ class QueryBuilderSelectTest extends PluggableH2test {
         // then
         assertThat(query).matches(예상결과_정규식);
     }
+
+//    @Test
+//    @DisplayName("JOIN 절이 포함된 SELECT 절 쿼리실행 테스트")
+//    void select_join_절_실행_테스트() {
+//
+//        runInH2Db((queryRunner) -> {
+//
+//        });
+//
+//        // given
+//        var queryStep = queryBuilder.selectFrom(Order.class, fakeQueryRunner)
+//                .joinAllEager()
+//                .whereWithId(1L);
+//        // when
+//        String query = queryStep.extractSql();
+//
+//        // then
+//        assertThat(query).matches(예상결과_정규식);
+//    }
+
+
 }
