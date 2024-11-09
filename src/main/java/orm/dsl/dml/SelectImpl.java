@@ -79,13 +79,6 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
     }
 
     @Override
-    public <T> InnerJoinForFetchStep<E> join(T associatedEntity) {
-        this.hasJoin = true;
-        this.tableEntity.addAliasIfNotAssigned();
-        return this;
-    }
-
-    @Override
     public E fetchOne(RowMapper<E> rowMapper) {
         return queryRunner.fetchOne(extractSql(), rowMapper);
     }
