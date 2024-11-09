@@ -16,5 +16,17 @@ public class Order {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
-    private List<OrderItem> orderItems;
+    public List<OrderItem> orderItems;
+
+    public Order() {
+
+    }
+
+    public Order(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
 }

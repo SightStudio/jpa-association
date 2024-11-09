@@ -118,13 +118,13 @@ public abstract class InsertImpl<E> implements InsertIntoStep<E> {
      */
     private <T> List<? extends TableField> extractInsertValues(T entity) {
         TableEntity<T> tableEntity = new TableEntity<>(entity);
-        return tableEntity.getIdGenerationType() == GenerationType.IDENTITY
+        return tableEntity.hasDbGeneratedId()
                 ? tableEntity.getNonIdFields()
                 : tableEntity.getAllFields();
     }
 
     private <T> List<? extends TableField> extractInsertFields(TableEntity<T> tableEntity ) {
-        return tableEntity.getIdGenerationType() == GenerationType.IDENTITY
+        return tableEntity.hasDbGeneratedId()
                 ? tableEntity.getNonIdFields()
                 : tableEntity.getAllFields();
     }

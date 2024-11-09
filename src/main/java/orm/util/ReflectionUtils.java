@@ -6,6 +6,8 @@ import orm.TableEntity;
 import orm.exception.ReflectionException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
@@ -52,6 +54,21 @@ public class ReflectionUtils {
             }
         } catch (IllegalAccessException e) {
             logger.error("Cannot access field: " + declaredField.getName(), e);
+        }
+    }
+
+    public static Class<?> extractGenericSignatureFromList(Field field) {
+        Type genericType = field.getGenericType();
+        if (!(genericType instanceof ParameterizedType parameterizedType)) {
+            return null;
+        }
+
+        Type actualType = parameterizedType.getActualTypeArguments()[0];
+
+        try {
+            return Class.forName(actualType.getTypeName());
+        } catch (ClassNotFoundException e) {
+            throw new ReflectionException("ClassNotFound" + e);
         }
     }
 }

@@ -4,8 +4,8 @@ import config.PluggableH2test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.sql.ddl.Order;
 import persistence.sql.ddl.Person;
-import persistence.sql.ddl.mapper.PersonRowMapper;
 import test_double.FakeQueryRunner;
 
 import java.util.List;
@@ -140,5 +140,31 @@ class QueryBuilderSelectTest extends PluggableH2test {
                     .hasSize(2)
                     .allSatisfy(person -> assertThat(person).hasNoNullFieldsOrPropertiesExcept("id", "name", "age"));
         });
+    }
+
+    @Test
+    @DisplayName("JOIN 절이 포함된 SELECT 절 쿼리빌더 테스트")
+    void join_절_생성_테스트() {
+
+        // given
+        var queryStep = queryBuilder.selectFrom(Order.class, fakeQueryRunner)
+                .joinAllEager()
+                .whereWithId(1L);
+
+        // 정규식 패턴 생성 (테이블명 + 3자리 숫자)
+        String 예상결과_정규식 = """
+        SELECT [order].id,[order].order_number,[order_items].id,[order_items].product,[order_items].quantity,[order_items].order_id
+         FROM orders [order]
+         JOIN order_items [order_items] ON [order].id = [order_items].order_id
+         WHERE [order].id = 1
+        """.replaceAll("\\[order]", "orders_\\\\d{3}")
+                .replaceAll("\\[order_items]", "order_items_\\\\d{3}")
+                .replaceAll("\n", "");
+
+        // when
+        String query = queryStep.extractSql();
+
+        // then
+        assertThat(query).matches(예상결과_정규식);
     }
 }

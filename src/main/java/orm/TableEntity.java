@@ -3,21 +3,17 @@ package orm;
 import jakarta.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import orm.assosiation.RelationPath;
+import orm.assosiation.RelationFields;
 import orm.dsl.holder.EntityIdHolder;
 import orm.exception.EntityHasNoDefaultConstructorException;
-import orm.exception.InvalidEntityException;
 import orm.exception.InvalidIdMappingException;
 import orm.settings.JpaSettings;
-import orm.util.CollectionUtils;
 import orm.util.ReflectionUtils;
 import orm.validator.EntityValidator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,10 +37,12 @@ public class TableEntity<E> {
     private final TablePrimaryField id;
 
     // 테이블의 모든 필드 (연관관계 제외)
-    private final TableFields<E> tableFields;
+    private final TableFields tableFields;
 
     // 연관관계
-    private final List<RelationPath> relationPathList;
+    private final RelationFields relationFields;
+
+    private TableAlias alias;
 
     public TableEntity(Class<E> entityClass, JpaSettings settings) {
         this.entity = createNewInstanceByDefaultConstructor(entityClass);
@@ -53,10 +51,11 @@ public class TableEntity<E> {
         this.id = extractId(settings);
         this.tableClass = entityClass;
         this.tableName = extractTableName(tableClass, settings);
-
         this.jpaSettings = settings;
-        this.tableFields = new TableFields<>(entity, settings);
-        this.relationPathList = new ArrayList<>();
+
+        var fieldClassifier = new TableFieldClassifier<>(entity, settings);
+        this.tableFields = fieldClassifier.getTableFields();
+        this.relationFields = fieldClassifier.getRelationFields();
     }
 
     public TableEntity(E entity, JpaSettings settings) {
@@ -67,8 +66,10 @@ public class TableEntity<E> {
         this.tableClass = entity.getClass();
         this.tableName = extractTableName(tableClass, settings);
         this.jpaSettings = settings;
-        this.tableFields = new TableFields<>(entity, settings);
-        this.relationPathList = new ArrayList<>();
+
+        var fieldClassifier = new TableFieldClassifier<>(entity, settings);
+        this.tableFields = fieldClassifier.getTableFields();
+        this.relationFields = fieldClassifier.getRelationFields();
     }
 
     public TableEntity(Class<E> entityClass) {
@@ -99,6 +100,7 @@ public class TableEntity<E> {
         tableFields.setFieldChanged(index, true);
     }
 
+    // DB에서 생성되는 ID인지 확인
     public boolean hasDbGeneratedId() {
         GenerationType idGenerationType = getIdGenerationType();
         return idGenerationType == GenerationType.IDENTITY;
@@ -162,8 +164,12 @@ public class TableEntity<E> {
         }
     }
 
-    public boolean hasJoinPath() {
-        return CollectionUtils.isNotEmpty(relationPathList);
+    public RelationFields getRelationFields() {
+        return this.relationFields;
+    }
+
+    public boolean hasRelationFields() {
+        return relationFields.hasRelation();
     }
 
     private E createNewInstanceByDefaultConstructor(Class<E> entityClass) {
@@ -195,7 +201,31 @@ public class TableEntity<E> {
         return new TablePrimaryField(idField, entity, settings);
     }
 
-    public <T> void addJoinPath(T associatedEntity) {
-//        joinPathList.add(joinPath);
+    public TableEntity<E> addAliasIfNotAssigned() {
+        if(this.alias == null) {
+            this.alias = new TableAlias(tableName);
+        }
+
+        return this;
+    }
+
+    public TableEntity<E> addAliasIfNotAssigned(TableAlias alias) {
+        if(this.alias == null) {
+            this.alias = alias;
+        }
+
+        return this;
+    }
+
+    public boolean hasAlias() {
+        return this.alias != null;
+    }
+
+    public TableAlias getAlias() {
+        return alias;
+    }
+
+    public String getAliasName() {
+        return alias.alias();
     }
 }

@@ -9,7 +9,10 @@ public record EntityFieldProperty(
         boolean isTransientAnnotated,
         boolean isColumnAnnotated,
         boolean isIdAnnotated,
-        boolean isAssociated
+        boolean isOneToOneAssociated,
+        boolean isOneToManyAssociated,
+        boolean isManyToOneAssociated,
+        boolean isManyToManyAssociated
 ) {
     public EntityFieldProperty(Field field) {
         this(
@@ -17,28 +20,11 @@ public record EntityFieldProperty(
                 field.isAnnotationPresent(Transient.class),
                 field.isAnnotationPresent(Column.class),
                 field.isAnnotationPresent(Id.class),
-                isAssociated(field)
+                field.isAnnotationPresent(OneToOne.class),
+                field.isAnnotationPresent(OneToMany.class),
+                field.isAnnotationPresent(ManyToOne.class),
+                field.isAnnotationPresent(ManyToMany.class)
         );
-    }
-
-    private static boolean isAssociated(Field field) {
-        if (field.isAnnotationPresent(OneToMany.class)) {
-            return true;
-        }
-
-        if (field.isAnnotationPresent(ManyToOne.class)) {
-            return true;
-        }
-
-        if (field.isAnnotationPresent(OneToOne.class)) {
-            return true;
-        }
-
-        if (field.isAnnotationPresent(ManyToMany.class)) {
-            return true;
-        }
-
-        return false;
     }
 
     // @Transient와 @Column이 동시에 존재하는 경우

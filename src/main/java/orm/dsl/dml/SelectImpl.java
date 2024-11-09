@@ -2,28 +2,37 @@ package orm.dsl.dml;
 
 import jdbc.RowMapper;
 import orm.TableEntity;
-import orm.dsl.QueryRenderer;
+import orm.assosiation.RelationFields;
 import orm.dsl.QueryRunner;
 import orm.dsl.condition.Condition;
 import orm.dsl.condition.Conditions;
 import orm.dsl.condition.EqualCondition;
+import orm.dsl.render.SelectRenderer;
+import orm.dsl.render.SimpleSelectRenderer;
+import orm.dsl.render.WithJoinQueryRenderer;
 import orm.dsl.step.dml.ConditionForFetchStep;
+import orm.dsl.step.dml.InnerJoinForFetchStep;
 import orm.dsl.step.dml.SelectFromStep;
-import orm.exception.NotYetImplementedException;
 import orm.row_mapper.DefaultRowMapper;
 
 import java.util.List;
 
-public abstract class SelectImpl<E> implements SelectFromStep<E>{
+public abstract class SelectImpl<E> implements SelectFromStep<E> {
 
     private final QueryRunner queryRunner;
     private final TableEntity<E> tableEntity;
     private final Conditions conditions;
 
+    private RelationFields relationFields;
+
+    private boolean hasJoin;
+
     public SelectImpl(TableEntity<E> tableEntity, QueryRunner queryRunner) {
         this.tableEntity = tableEntity;
         this.queryRunner = queryRunner;
         this.conditions = new Conditions();
+        this.relationFields = new RelationFields();
+        this.hasJoin = false;
     }
 
     @Override
@@ -39,19 +48,39 @@ public abstract class SelectImpl<E> implements SelectFromStep<E>{
     }
 
     @Override
+    public ConditionForFetchStep<E> whereWithId(Object id) {
+        final String idFieldName = tableEntity.getId().getFieldName();
+        final String fieldName = tableEntity.hasAlias()
+                ? tableEntity.getAliasName() + "." + idFieldName
+                : idFieldName;
+
+        this.conditions.clear();
+        this.conditions.add(new EqualCondition(fieldName, id));
+        return this;
+    }
+
+    @Override
     public String extractSql() {
-        QueryRenderer queryRenderer = new QueryRenderer();
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("SELECT ");
-        queryBuilder.append(queryRenderer.joinColumnNamesWithComma(tableEntity.getAllFields()));
-        queryBuilder.append(" FROM ");
-        queryBuilder.append(tableEntity.getTableName());
+        final SelectRenderer<E> selectRenderer = hasJoin
+                ? new WithJoinQueryRenderer<>(tableEntity, conditions, relationFields)
+                : new SimpleSelectRenderer<>(tableEntity, conditions);
 
-        if (conditions.hasCondition()) {
-            queryBuilder.append(queryRenderer.renderWhere(conditions));
-        }
+        return selectRenderer.renderSql();
+    }
 
-        return queryBuilder.toString();
+    @Override
+    public InnerJoinForFetchStep<E> joinAllEager() {
+        this.hasJoin = true;
+        this.tableEntity.addAliasIfNotAssigned();
+        this.relationFields = new RelationFields(tableEntity.getRelationFields());
+        return this;
+    }
+
+    @Override
+    public <T> InnerJoinForFetchStep<E> join(T associatedEntity) {
+        this.hasJoin = true;
+        this.tableEntity.addAliasIfNotAssigned();
+        return this;
     }
 
     @Override
