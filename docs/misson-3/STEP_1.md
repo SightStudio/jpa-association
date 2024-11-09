@@ -2,8 +2,8 @@
 
 ## TODO
 
-- [ ] Select Join 절 만들기
-- [ ] Fetcher에 연관 엔티티 추가 
+- [X] Select Join 절 만들기
+- [X] Fetcher에 연관 엔티티 추가 
 - [ ] Save 시 Insert Query 추가
 
 ### 요구 사항 1
@@ -25,3 +25,20 @@ requery가 제일 먼저 죽은걸 보면 결국 DSL을 만들어야할듯하다
 - ManyToOne같은 나머지는 고려하지 않는다.
 
 
+### 삽짉기
+아... 하이버네이트가 select시에 이렇게 alias를 붙이던 이유가 있었다.
+id컬럼처럼 컬럼명이 같은 경우에는 어떤 테이블의 id인지 알 수 없기 때문에...
+
+```sql
+SELECT p.id AS col_0_0_,
+       c.name AS col_1_0_,
+       p.id AS id1_1_,
+       p.locale AS locale2_1_,
+       p.name AS name3_1_
+FROM   Person p
+INNER JOIN
+       Country c
+ON
+    ( p.locale = c.locale )
+ORDER BY p.id
+```

@@ -4,7 +4,6 @@ import config.PluggableH2test;
 import jdbc.RowMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import orm.dsl.QueryBuilder;
 import persistence.sql.ddl.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +26,7 @@ class RowMapperTest extends PluggableH2test {
             queryBuilder.insertIntoValues(newPerson, queryRunner).execute();
 
             // when
-            RowMapper<Person> rowMapper = new DefaultRowMapper<>(newPerson);
+            RowMapper<Person> rowMapper = new SimpleRowMapper<>(newPerson);
             Person person = queryBuilder.selectFrom(Person.class, queryRunner)
                     .fetchOne(rowMapper);
 

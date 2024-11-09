@@ -54,6 +54,10 @@ public class RelationField {
         return tableEntity;
     }
 
+    public Class<?> tableEntityClass() {
+        return tableEntity.getTableClass();
+    }
+
     public String getAliasName() {
         return tableEntity.getAliasName();
     }

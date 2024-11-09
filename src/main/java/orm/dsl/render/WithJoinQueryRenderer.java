@@ -38,6 +38,7 @@ public class WithJoinQueryRenderer<E> extends SelectRenderer<E> {
         return queryBuilder.toString();
     }
 
+    // SELECT 컬럼 렌더링
     private String renderAliasAwareSelectColumn() {
 
         // 드라이빙 테이블 컬럼들
@@ -79,9 +80,14 @@ public class WithJoinQueryRenderer<E> extends SelectRenderer<E> {
         return "%s.%s".formatted(joinTableEntity.getAliasName(), relationField.getJoinColumnName());
     }
 
+    // 단일 테이블에 대한 컬럼들 매핑
     private String aliasedColumnNameInSingleTable(String aliasName, List<TableField> fields) {
         return fields.stream()
-                .map(tableField -> "%s.%s".formatted(aliasName, tableField.getFieldName()))
+                .map(tableField -> "%s.%s AS %s_%s".formatted(
+                        aliasName, tableField.getFieldName(),
+                        aliasName, tableField.getFieldName()
+                    )
+                )
                 .collect(Collectors.joining(","));
     }
 }

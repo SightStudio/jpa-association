@@ -1,0 +1,22 @@
+@startuml
+
+class TableEntity<E> {
+    - List<TableEntity> joinPath; // 핵심
+}
+
+class TableField {
+    - ColumnMeta columnMeta;
+
+    + boolean isId()
+}
+
+class TablePrimaryField extends TableField {
+    - Id id
+    - GeneratedValue generatedValue
+    + void setIdValue();
+}
+
+TableEntity "1" *-- "1" TablePrimaryField
+TableEntity "1" *-- "many" TableField
+
+@enduml

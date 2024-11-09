@@ -29,4 +29,13 @@ public class Order {
     public List<OrderItem> getOrderItems() {
         return orderItems;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
 }

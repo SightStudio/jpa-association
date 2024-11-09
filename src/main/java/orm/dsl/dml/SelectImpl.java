@@ -13,7 +13,8 @@ import orm.dsl.render.WithJoinQueryRenderer;
 import orm.dsl.step.dml.ConditionForFetchStep;
 import orm.dsl.step.dml.InnerJoinForFetchStep;
 import orm.dsl.step.dml.SelectFromStep;
-import orm.row_mapper.DefaultRowMapper;
+import orm.row_mapper.EntityGraphAwareRowMapper;
+import orm.row_mapper.SimpleRowMapper;
 
 import java.util.List;
 
@@ -23,8 +24,8 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
     private final TableEntity<E> tableEntity;
     private final Conditions conditions;
 
+    // join에 사용될 연관관계
     private RelationFields relationFields;
-
     private boolean hasJoin;
 
     public SelectImpl(TableEntity<E> tableEntity, QueryRunner queryRunner) {
@@ -68,8 +69,9 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
         return selectRenderer.renderSql();
     }
 
+    // 엔티티의 모든 연관관계를 파악하여 조인절에 추가함
     @Override
-    public InnerJoinForFetchStep<E> joinAllEager() {
+    public InnerJoinForFetchStep<E> joinAll() {
         this.hasJoin = true;
         this.tableEntity.addAliasIfNotAssigned();
         this.relationFields = new RelationFields(tableEntity.getRelationFields());
@@ -104,11 +106,19 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
 
     @Override
     public E fetchOne() {
-        return queryRunner.fetchOne(extractSql(), new DefaultRowMapper<>(tableEntity));
+        final String sql = extractSql();
+        return queryRunner.fetchOne(sql, getRowMapper());
     }
 
     @Override
     public List<E> fetch() {
-        return queryRunner.fetch(extractSql(), new DefaultRowMapper<>(tableEntity));
+        final String sql = extractSql();
+        return queryRunner.fetch(sql, getRowMapper());
+    }
+
+    private RowMapper<E> getRowMapper() {
+        return hasJoin
+                ? new EntityGraphAwareRowMapper<>(tableEntity, relationFields)
+                : new SimpleRowMapper<>(tableEntity);
     }
 }

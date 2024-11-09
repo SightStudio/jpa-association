@@ -31,4 +31,8 @@ public record EntityFieldProperty(
     public boolean hasConflictTransientColumn() {
         return isTransientAnnotated && isColumnAnnotated;
     }
+
+    public boolean isRelationAnnotation() {
+        return isOneToOneAssociated || isOneToManyAssociated || isManyToOneAssociated || isManyToManyAssociated;
+    }
 }

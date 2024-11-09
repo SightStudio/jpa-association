@@ -1,6 +1,7 @@
 package orm.assosiation;
 
 import jakarta.persistence.FetchType;
+import orm.exception.EntityClassTypeNotInRelationException;
 import orm.util.CollectionUtils;
 
 import java.util.Collections;
@@ -26,6 +27,13 @@ public class RelationFields {
         return relationFieldList;
     }
 
+    public RelationField getRelationFieldsOfType(Class<?> clazz) {
+        return relationFieldList.stream()
+                .filter(relationField -> relationField.tableEntityClass().equals(clazz))
+                .findFirst()
+                .orElseThrow(() -> new EntityClassTypeNotInRelationException("연관관계 목록에 해당 엔티티 타입이 없습니다" + clazz));
+    }
+
     public List<RelationField> getEagerRelationList() {
         return relationFieldList.stream()
                 .filter(relationField -> relationField.getFetchType() == FetchType.EAGER)
@@ -41,4 +49,5 @@ public class RelationFields {
                 .map(RelationField::new)
                 .toList();
     }
+
 }

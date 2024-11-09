@@ -11,17 +11,17 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class DefaultRowMapper<T> implements RowMapper<T> {
+public class SimpleRowMapper<T> implements RowMapper<T> {
 
     private final Class<T> type;
     private final TableEntity<T> tableEntity;
 
-    public DefaultRowMapper(T entity) {
+    public SimpleRowMapper(T entity) {
         this.tableEntity = new TableEntity<>(entity);
         this.type = tableEntity.getTableClass();
     }
 
-    public DefaultRowMapper(TableEntity<T> tableEntity) {
+    public SimpleRowMapper(TableEntity<T> tableEntity) {
         this.tableEntity = tableEntity;
         this.type = tableEntity.getTableClass();
     }
