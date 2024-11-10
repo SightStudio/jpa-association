@@ -1,6 +1,5 @@
 package orm.dsl.dml;
 
-import jakarta.persistence.GenerationType;
 import orm.TableEntity;
 import orm.TableField;
 import orm.dsl.QueryRenderer;

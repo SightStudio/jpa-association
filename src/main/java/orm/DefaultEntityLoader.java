@@ -17,7 +17,8 @@ public class DefaultEntityLoader implements EntityLoader {
     @Override
     public <T> T find(Class<T> clazz, Object id) {
         return queryBuilder.selectFrom(clazz, queryRunner)
-                .findById(id)
+                .joinAll()
+                .whereWithId(id)
                 .fetchOne();
     }
 

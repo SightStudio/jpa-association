@@ -3,11 +3,14 @@ package orm;
 import config.PluggableH2test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import persistence.sql.ddl.Order;
+import persistence.sql.ddl.OrderItem;
 import persistence.sql.ddl.Person;
 import test_entity.PersonWithAI;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static steps.Steps.테이블_생성;
+import static steps.Steps.*;
+import static steps.Steps.OrderItem_엔티티_생성;
 
 class SessionImplTest extends PluggableH2test {
 
@@ -141,6 +144,33 @@ class SessionImplTest extends PluggableH2test {
 
             // then
             assertThat(personWithAI.getId()).isNotNull();
+        });
+    }
+
+    @Test
+    @DisplayName("엔티티를 조회하면 Eager 연관관계를 포함해서 조회한다.")
+    void 엔티티_Eager_포함_조회() {
+        runInH2Db((queryRunner, queryBuilder) -> {
+            // given
+            테이블_생성(queryRunner, Order.class);
+            테이블_생성(queryRunner, OrderItem.class);
+            SessionImpl session = new SessionImpl(queryRunner);
+
+            Order order = Order_엔티티_생성(queryRunner, new Order("12131"));
+            OrderItem orderItem1 = OrderItem_엔티티_생성(queryRunner, new OrderItem(order.getId(), "product1", 10));
+            OrderItem orderItem2 = OrderItem_엔티티_생성(queryRunner, new OrderItem(order.getId(), "product2", 11));
+
+            // when
+            Order foundOrder = session.find(Order.class, 1L);
+
+            // then
+            assertThat(foundOrder)
+                    .satisfies(order1 -> {
+                        assertThat(order1).hasNoNullFieldsOrPropertiesExcept("id", "orderNumber", "orderItems");
+                        assertThat(order1.getOrderItems()).asList()
+                                .hasSize(2)
+                                .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("id", "product", "quantity", "orderId"));
+                    });
         });
     }
 }

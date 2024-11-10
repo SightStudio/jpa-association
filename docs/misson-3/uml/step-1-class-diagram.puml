@@ -1,22 +1,32 @@
 @startuml
-
-class TableEntity<E> {
-    - List<TableEntity> joinPath; // 핵심
+interface RowMapper<T> {
+    +mapRow(resultSet: ResultSet): T
 }
 
-class TableField {
-    - ColumnMeta columnMeta;
-
-    + boolean isId()
+class SimpleRowMapper implements RowMapper<T> {
+    +mapRow(resultSet: ResultSet): T
 }
 
-class TablePrimaryField extends TableField {
-    - Id id
-    - GeneratedValue generatedValue
-    + void setIdValue();
+class EntityGraphAwareRowMapper implements RowMapper<T> {
+    +mapRow(resultSet: ResultSet): T
+}
+@enduml
+
+@startuml
+abstract class SelectRenderer<E> {
+    - TableEntity<E> tableEntity
+    - Conditions conditions
+    - RelationFields relationFields
+    + SelectRenderer(TableEntity<E> tableEntity, Conditions conditions, RelationFields relationFields)
+    + String renderSql()
 }
 
-TableEntity "1" *-- "1" TablePrimaryField
-TableEntity "1" *-- "many" TableField
+class SimpleSelectRenderer<E> extends SelectRenderer<E> {
+    + String renderSql()
+}
+
+class WithJoinQueryRenderer<E> extends SelectRenderer<E> {
+    + String renderSql()
+}
 
 @enduml

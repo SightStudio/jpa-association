@@ -72,6 +72,12 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
     // 엔티티의 모든 연관관계를 파악하여 조인절에 추가함
     @Override
     public InnerJoinForFetchStep<E> joinAll() {
+
+        // 연관관계가 없으면 조인을 하지 않음
+        if(!tableEntity.hasRelationFields()) {
+            return this;
+        }
+
         this.hasJoin = true;
         this.tableEntity.addAliasIfNotAssigned();
         this.relationFields = new RelationFields(tableEntity.getRelationFields());
