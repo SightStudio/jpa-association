@@ -14,16 +14,16 @@ import java.util.List;
  * 엔티티에서 테이블 필드와 연관관계 필드를 분류하는 클래스
  * @param <E> 엔티티 제네릭
  */
-public class TableClassifier<E> {
+public class TableFieldClassifier<E> {
 
     private TableFields tableFields;
     private RelationFields relationFields;
 
-    public TableClassifier(E entity, JpaSettings settings) {
+    public TableFieldClassifier(E entity, JpaSettings settings) {
         classifyAllFields(entity, settings);
     }
 
-    public TableClassifier(E entity) {
+    public TableFieldClassifier(E entity) {
         classifyAllFields(entity, JpaSettings.ofDefault());
     }
 

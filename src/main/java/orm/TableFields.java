@@ -60,4 +60,8 @@ public class TableFields {
             field.setFieldValue(fieldValue);
         }
     }
+
+    public int size() {
+        return this.getAllFields().size();
+    }
 }

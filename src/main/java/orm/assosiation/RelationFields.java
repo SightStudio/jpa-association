@@ -30,6 +30,10 @@ public class RelationFields {
         return relationFieldList;
     }
 
+    public int size() {
+        return relationFieldList.size();
+    }
+
     // 연관 관계 필드중 값이 있는 필드만 추출
     public List<RelationField> getValuedRelationList() {
         return relationFieldList.stream()

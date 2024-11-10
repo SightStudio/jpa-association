@@ -53,7 +53,7 @@ public class TableEntity<E> {
         this.tableName = extractTableName(tableClass, settings);
         this.jpaSettings = settings;
 
-        var fieldClassifier = new TableClassifier<>(entity, settings);
+        var fieldClassifier = new TableFieldClassifier<>(entity, settings);
         this.tableFields = fieldClassifier.getTableFields();
         this.relationFields = fieldClassifier.getRelationFields();
     }
@@ -67,7 +67,7 @@ public class TableEntity<E> {
         this.tableName = extractTableName(tableClass, settings);
         this.jpaSettings = settings;
 
-        var fieldClassifier = new TableClassifier<>(entity, settings);
+        var fieldClassifier = new TableFieldClassifier<>(entity, settings);
         this.tableFields = fieldClassifier.getTableFields();
         this.relationFields = fieldClassifier.getRelationFields();
     }
