@@ -14,21 +14,25 @@ import java.util.List;
  * 엔티티에서 테이블 필드와 연관관계 필드를 분류하는 클래스
  * @param <E> 엔티티 제네릭
  */
-public class TableFieldClassifier<E> {
+public class TableClassifier<E> {
 
     private TableFields tableFields;
     private RelationFields relationFields;
 
-    public TableFieldClassifier(E entity, JpaSettings settings) {
+    public TableClassifier(E entity, JpaSettings settings) {
         classifyAllFields(entity, settings);
     }
 
-    public TableFieldClassifier(E entity) {
+    public TableClassifier(E entity) {
         classifyAllFields(entity, JpaSettings.ofDefault());
     }
 
     public RelationFields getRelationFields() {
         return relationFields;
+    }
+
+    public List<RelationField> getValuedRelationFields() {
+        return relationFields.getValuedRelationList();
     }
 
     public TableFields getTableFields() {
@@ -63,7 +67,7 @@ public class TableFieldClassifier<E> {
 
             // 연관 관계 분류 - 다중
             if (entityProperty.isOneToManyAssociated()) {
-                association.add(RelationField.ofOneToManyRelation(declaredField, settings));
+                association.add(RelationField.ofOneToManyRelation(entity, declaredField, settings));
                 continue;
             }
 

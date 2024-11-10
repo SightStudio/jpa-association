@@ -53,7 +53,7 @@ public class TableEntity<E> {
         this.tableName = extractTableName(tableClass, settings);
         this.jpaSettings = settings;
 
-        var fieldClassifier = new TableFieldClassifier<>(entity, settings);
+        var fieldClassifier = new TableClassifier<>(entity, settings);
         this.tableFields = fieldClassifier.getTableFields();
         this.relationFields = fieldClassifier.getRelationFields();
     }
@@ -67,7 +67,7 @@ public class TableEntity<E> {
         this.tableName = extractTableName(tableClass, settings);
         this.jpaSettings = settings;
 
-        var fieldClassifier = new TableFieldClassifier<>(entity, settings);
+        var fieldClassifier = new TableClassifier<>(entity, settings);
         this.tableFields = fieldClassifier.getTableFields();
         this.relationFields = fieldClassifier.getRelationFields();
     }
@@ -153,6 +153,7 @@ public class TableEntity<E> {
     public void syncFieldValueToEntity() {
         // non-id field들의 fieldName과 fieldValue를 매핑
         Map<String, Object> classFieldNameMap = this.getNonIdFields().stream()
+                .filter(tableField -> tableField.getFieldValue() != null)
                 .collect(Collectors.toMap(TableField::getClassFieldName, TableField::getFieldValue));
 
         // id field들의 fieldName과 fieldValue를 매핑

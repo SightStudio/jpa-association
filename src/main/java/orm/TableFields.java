@@ -52,6 +52,7 @@ public class TableFields {
     // 모든 필드를 주어진 필드로 교체한다.
     public void replaceAllFields(List<? extends TableField> newTableFields) {
         Map<String, Object> fieldValueMap = newTableFields.stream()
+                .filter(tableField -> tableField.getFieldValue() != null)
                 .collect(Collectors.toMap(TableField::getFieldName, TableField::getFieldValue));
 
         for (TableField field : allFields) {

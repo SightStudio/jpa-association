@@ -20,6 +20,11 @@ public class OrderItem {
 
     }
 
+    public OrderItem(String product, Integer quantity) {
+        this.product = product;
+        this.quantity = quantity;
+    }
+
     public OrderItem(Long orderId, String product, Integer quantity) {
         this.orderId = orderId;
         this.product = product;

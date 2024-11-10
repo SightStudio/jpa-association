@@ -2,6 +2,7 @@ package persistence.sql.ddl;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,4 +39,10 @@ public class Order {
         return orderNumber;
     }
 
+    public void addOrderItem(OrderItem orderItem) {
+        if(this.orderItems == null) {
+            this.orderItems = new ArrayList<>();
+        }
+        this.orderItems.add(orderItem);
+    }
 }

@@ -10,7 +10,6 @@ import test_entity.PersonWithAI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static steps.Steps.*;
-import static steps.Steps.OrderItem_엔티티_생성;
 
 class SessionImplTest extends PluggableH2test {
 
@@ -170,6 +169,34 @@ class SessionImplTest extends PluggableH2test {
                         assertThat(order1.getOrderItems()).asList()
                                 .hasSize(2)
                                 .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("id", "product", "quantity", "orderId"));
+                    });
+        });
+    }
+
+    @Test
+    @DisplayName("연관관계가 포함된 엔티티를 저장하면 연관관계도 같이 저장한다.")
+    void 엔티티_Eager_포함_저장() {
+        runInH2Db((queryRunner, queryBuilder) -> {
+            // given
+            테이블_생성(queryRunner, Order.class);
+            테이블_생성(queryRunner, OrderItem.class);
+            SessionImpl session = new SessionImpl(queryRunner);
+
+            Order order = new Order("12131");
+            order.addOrderItem(new OrderItem("product1", 10));
+            order.addOrderItem(new OrderItem("product2", 11));
+
+            // when
+            session.persist(order);
+            Order foundOrder = session.find(Order.class, 1L);
+
+            // then
+            assertThat(foundOrder)
+                    .satisfies(order1 -> {
+                        assertThat(order1).hasNoNullFieldsOrProperties();
+                        assertThat(order1.getOrderItems()).asList()
+                                .hasSize(2)
+                                .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("orderId")); // orderId는 저장하지 않음
                     });
         });
     }

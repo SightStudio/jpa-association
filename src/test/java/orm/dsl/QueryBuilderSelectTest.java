@@ -159,8 +159,8 @@ class QueryBuilderSelectTest extends PluggableH2test {
          FROM orders [order]
          JOIN order_items [order_items] ON [order].id = [order_items].order_id
          WHERE [order].id = 1
-        """.replaceAll("\\[order]", "orders_\\\\d{3}")
-           .replaceAll("\\[order_items]", "order_items_\\\\d{3}"));
+        """.replaceAll("\\[order]", "orders_\\\\d{1,3}")
+           .replaceAll("\\[order_items]", "order_items_\\\\d{1,3}"));
 
         // when
         String query = SQL_노멀라이즈(queryStep.extractSql());

@@ -71,4 +71,13 @@ public class ReflectionUtils {
             throw new ReflectionException("ClassNotFound" + e);
         }
     }
+
+    public static Object getFieldValueFromObject(Object object, Field field) {
+        field.setAccessible(true);
+        try {
+            return field.get(object);
+        } catch (IllegalAccessException e) {
+            throw new ReflectionException("오브젝트 필드의 데이터를 가져 올 수 없습니다." + e);
+        }
+    }
 }
