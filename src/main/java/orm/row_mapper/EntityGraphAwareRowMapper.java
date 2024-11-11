@@ -72,18 +72,18 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
         }
 
         // 연관관계 매핑
-        Field[] relationFields = filterRelationField(rootEntity);
-        for (Field relationField : relationFields) {
-            mapRelationFieldsInRow(rs, rootEntity, relationField);
+        List<EntityFieldProperty> entityFieldProperties = filterRelationField(rootEntity);
+        for (EntityFieldProperty entityFieldProperty : entityFieldProperties) {
+            mapRelationFieldsInRow(rs, rootEntity, entityFieldProperty);
         }
-
         return rootEntity;
     }
 
-    private Field[] filterRelationField(T rootEntity) {
+    private List<EntityFieldProperty> filterRelationField(T rootEntity) {
         return Arrays.stream(rootEntity.getClass().getDeclaredFields())
-                .filter(field -> new EntityFieldProperty(field).isRelationAnnotation())
-                .toArray(Field[]::new);
+                .map(EntityFieldProperty::new)
+                .filter(EntityFieldProperty::isOneToManyAssociated)
+                .toList();
     }
 
     /**
@@ -92,14 +92,14 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
      *
      * @param rs            ResultSet
      * @param rootEntity    루트 엔티티
-     * @param relationField 연관관계 필드
+     * @param entityFieldProperty 엔티티 필드
      */
-    private void mapRelationFieldsInRow(ResultSet rs, T rootEntity, Field relationField) {
-        EntityFieldProperty entityFieldProperty = new EntityFieldProperty(relationField);
+    private void mapRelationFieldsInRow(ResultSet rs, T rootEntity, EntityFieldProperty entityFieldProperty) {
         if (!entityFieldProperty.isOneToManyAssociated()) {
             return;
         }
 
+        Field relationField = entityFieldProperty.field();
         relationField.setAccessible(true);
 
         try {
