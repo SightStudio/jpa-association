@@ -1,6 +1,7 @@
 package orm;
 
 import orm.assosiation.RelationField;
+import orm.assosiation.RelationFields;
 import orm.dirty_check.DirtyCheckMarker;
 import orm.dsl.QueryBuilder;
 import orm.dsl.QueryRunner;
@@ -20,13 +21,13 @@ public class DefaultEntityPersister implements EntityPersister {
 
     @Override
     public <T> T persist(T entity) {
-        var tableClassifier = new TableFieldClassifier<>(entity);
+        var tableClassifier = new RelationFields<>(entity);
 
         T rootEntity = queryBuilder.insertIntoValues(entity, queryRunner)
                 .returnAsEntity();
 
         // 연관관계 필드 저장
-        List<RelationField> valuedRelationList = tableClassifier.getValuedRelationFields();
+        List<RelationField> valuedRelationList = tableClassifier.getValuedRelationList();
         for (RelationField relationField : valuedRelationList) {
             persistRelations(relationField);
         }

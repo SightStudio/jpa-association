@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  */
 public class WithJoinQueryRenderer<E> extends SelectRenderer<E> {
 
-    public WithJoinQueryRenderer(TableEntity<E> tableEntity, Conditions conditions, RelationFields relationFields) {
+    public WithJoinQueryRenderer(TableEntity<E> tableEntity, Conditions conditions, RelationFields<E> relationFields) {
         super(tableEntity, conditions, relationFields);
     }
 

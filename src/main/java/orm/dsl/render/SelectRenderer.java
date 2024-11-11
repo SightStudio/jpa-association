@@ -11,9 +11,9 @@ public abstract class SelectRenderer<E> {
 
     protected final TableEntity<E> tableEntity;
     protected final Conditions conditions;
-    protected final RelationFields relationFields;
+    protected final RelationFields<E> relationFields;
 
-    public SelectRenderer(TableEntity<E> tableEntity, Conditions conditions, RelationFields relationFields) {
+    public SelectRenderer(TableEntity<E> tableEntity, Conditions conditions, RelationFields<E> relationFields) {
         this.tableEntity = tableEntity;
         this.conditions = conditions;
         this.relationFields = relationFields;

@@ -1,6 +1,10 @@
 package orm;
 
 
+import orm.exception.InvalidEntityException;
+import orm.settings.JpaSettings;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -10,11 +14,21 @@ import java.util.stream.Collectors;
 /**
  * TableField에 대한 일급객체
  */
-public class TableFields {
+public class TableFields<E> {
 
     // allFields 중 변경된 필드를 추적하기 위한 BitSet
     private final BitSet changedFieldsBitset;
     private final List<TableField> allFields;
+
+    public TableFields (E entity, JpaSettings settings) {
+        this.allFields = extractTableFieldsFromEntity(entity, settings);
+        this.changedFieldsBitset = new BitSet(allFields.size());
+    }
+
+    public TableFields (E entity) {
+        this.allFields = extractTableFieldsFromEntity(entity, JpaSettings.ofDefault());
+        this.changedFieldsBitset = new BitSet(allFields.size());
+    }
 
     public TableFields(List<TableField> allFields) {
         this.allFields = allFields;
@@ -63,5 +77,48 @@ public class TableFields {
 
     public int size() {
         return this.getAllFields().size();
+    }
+
+    // @Transient와 @Column이 동시에 존재하는 경우 금지
+    private void throwIfContainsTransientColumn(EntityFieldProperty entityFieldProperty, Class<?> entityClass) {
+        if (entityFieldProperty.hasConflictTransientColumn()) {
+            throw new InvalidEntityException(String.format(
+                    "class %s @Transient & @Column cannot be used in same field"
+                    , entityClass.getName())
+            );
+        }
+    }
+
+    // 엔티티로부터 TableField 추출
+    private List<TableField> extractTableFieldsFromEntity(E entity, JpaSettings settings) {
+        Class<?> entityClass = entity.getClass();
+        Field[] declaredFields = entityClass.getDeclaredFields();
+
+        // 연관관계가 아닌 필드
+        List<TableField> columnList = new ArrayList<>(declaredFields.length);
+
+        for (Field declaredField : declaredFields) {
+            var entityProperty = new EntityFieldProperty(declaredField);
+            throwIfContainsTransientColumn(entityProperty, entityClass);
+
+            // transient 필드 무시
+            if (entityProperty.isTransientAnnotated()) {
+                continue;
+            }
+
+            // 연관관계 필드 무시
+            if (entityProperty.isRelationAnnotation()) {
+                continue;
+            }
+
+            // @Id가 존재 여부에 따라 테이블 필드 생성
+            var tableField = entityProperty.isIdAnnotated()
+                    ? new TablePrimaryField(declaredField, entity, settings)
+                    : new TableField(declaredField, entity, settings);
+
+            columnList.add(tableField);
+        }
+
+        return columnList;
     }
 }
