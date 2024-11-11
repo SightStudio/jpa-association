@@ -170,6 +170,31 @@ class QueryBuilderSelectTest extends PluggableH2test {
     }
 
     @Test
+    @DisplayName("""
+        JOIN 절이 포함되지 않은 SELECT 절 쿼리빌더 테스트
+        - JOIN 절이 없으면, alias를 생성하지 않는다.
+    """)
+    void select_절_생성_테스트() {
+
+        // given
+        var queryStep = queryBuilder.selectFrom(Order.class, fakeQueryRunner)
+                .whereWithId(1L);
+
+        String 예상결과 = SQL_노멀라이즈("""
+        SELECT id,
+               order_number
+         FROM orders
+         WHERE id = 1
+        """);
+
+        // when
+        String query = SQL_노멀라이즈(queryStep.extractSql());
+
+        // then
+        assertThat(query).isEqualTo(예상결과);
+    }
+
+    @Test
     @DisplayName("JOIN 절이 포함된 SELECT 절 쿼리 실행 테스트")
     void select_join_절_실행_테스트() {
 
