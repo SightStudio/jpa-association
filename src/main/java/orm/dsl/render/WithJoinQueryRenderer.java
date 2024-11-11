@@ -26,12 +26,7 @@ public class WithJoinQueryRenderer<E> extends SelectRenderer<E> {
         queryBuilder.append("SELECT %s".formatted(renderAliasAwareSelectColumn()));
         queryBuilder.append(" FROM %s".formatted(renderFrom()));
 
-        // join
-        if (tableEntity.hasRelationFields()) {
-            queryBuilder
-                    .append(" ")
-                    .append(renderJoin());
-        }
+        queryBuilder.append(" ").append(renderJoin());
 
         // TODO: join된 테이블에 대한 조건절은 나중에 구현한다.
         if (conditions.hasCondition()) {
