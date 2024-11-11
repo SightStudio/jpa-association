@@ -167,9 +167,5 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
             }
         }
     }
-
-    private String columnNameWithAlias(TableEntity<?> tableEntity, TableField tableField) {
-        return "%s_%s".formatted(tableEntity.getAliasName(), tableField.getFieldName());
-    }
 }
 
