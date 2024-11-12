@@ -2,6 +2,7 @@ package orm;
 
 
 import orm.exception.InvalidEntityException;
+import orm.meta.EntityFieldMeta;
 import orm.settings.JpaSettings;
 
 import java.lang.reflect.Field;
@@ -80,8 +81,8 @@ public class TableFields<E> {
     }
 
     // @Transient와 @Column이 동시에 존재하는 경우 금지
-    private void throwIfContainsTransientColumn(EntityFieldProperty entityFieldProperty, Class<?> entityClass) {
-        if (entityFieldProperty.hasConflictTransientColumn()) {
+    private void throwIfContainsTransientColumn(EntityFieldMeta entityFieldMeta, Class<?> entityClass) {
+        if (entityFieldMeta.hasConflictTransientColumn()) {
             throw new InvalidEntityException(String.format(
                     "class %s @Transient & @Column cannot be used in same field"
                     , entityClass.getName())
@@ -98,7 +99,7 @@ public class TableFields<E> {
         List<TableField> columnList = new ArrayList<>(declaredFields.length);
 
         for (Field declaredField : declaredFields) {
-            var entityProperty = new EntityFieldProperty(declaredField);
+            var entityProperty = new EntityFieldMeta(declaredField);
             throwIfContainsTransientColumn(entityProperty, entityClass);
 
             // transient 필드 무시

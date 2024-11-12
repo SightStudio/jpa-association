@@ -74,7 +74,7 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
     public InnerJoinForFetchStep<E> joinAll() {
         this.hasJoin = true;
         this.tableEntity.addAliasIfNotAssigned();
-        this.relationFields = new RelationFields(tableEntity.getRelationFields());
+        this.relationFields = new RelationFields<>(tableEntity.getRelationFields());
         return this;
     }
 

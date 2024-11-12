@@ -1,7 +1,7 @@
 package orm.assosiation;
 
 import jakarta.persistence.FetchType;
-import orm.EntityFieldProperty;
+import orm.meta.EntityFieldMeta;
 import orm.exception.EntityClassTypeNotInRelationException;
 import orm.exception.NotYetImplementedException;
 import orm.settings.JpaSettings;
@@ -33,10 +33,6 @@ public class RelationFields<E> {
 
     public RelationFields(RelationFields<E> relationField) {
         this.relationFieldList = deepCopyRelationFields(relationField);
-    }
-
-    public RelationFields(List<RelationField> relationFields) {
-        this.relationFieldList = relationFields;
     }
 
     public List<RelationField> getRelationList() {
@@ -88,7 +84,7 @@ public class RelationFields<E> {
         List<RelationField> associationList = new ArrayList<>(declaredFields.length);
 
         for (Field declaredField : declaredFields) {
-            var entityProperty = new EntityFieldProperty(declaredField);
+            var entityProperty = new EntityFieldMeta(declaredField);
 
             // 연관 관계 분류 - 단일
             if (entityProperty.isManyToOneAssociated()) {

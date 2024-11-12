@@ -7,6 +7,7 @@ import orm.assosiation.RelationFields;
 import orm.dsl.holder.EntityIdHolder;
 import orm.exception.EntityHasNoDefaultConstructorException;
 import orm.exception.InvalidIdMappingException;
+import orm.meta.EntityMeta;
 import orm.settings.JpaSettings;
 import orm.util.ReflectionUtils;
 import orm.validator.EntityValidator;
@@ -27,47 +28,42 @@ public class TableEntity<E> {
 
     private static final Logger logger = LoggerFactory.getLogger(TableEntity.class);
 
-    private final String tableName;
-
     private final E entity;
     private final Class<?> tableClass;
     private final JpaSettings jpaSettings;
+
+    // 엔티티 클래스 메타정보
+    private final EntityMeta entityMeta;
 
     // 테이블의 ID 필드
     private final TablePrimaryField id;
 
     // 테이블의 모든 필드 (연관관계 제외)
-    private final TableFields tableFields;
+    private final TableFields<E> tableFields;
 
     // 연관관계
-    private final RelationFields relationFields;
+    private final RelationFields<E> relationFields;
 
     private TableAlias alias;
 
     public TableEntity(Class<E> entityClass, JpaSettings settings) {
         this.entity = createNewInstanceByDefaultConstructor(entityClass);
-        new EntityValidator<>(entity).validate();
-
         this.id = extractId(settings);
-        this.tableClass = entityClass;
-        this.tableName = extractTableName(tableClass, settings);
-        this.jpaSettings = settings;
-
+        this.entityMeta = new EntityMeta(this.entity, settings);
         this.tableFields = new TableFields<>(entity, settings);
         this.relationFields = new RelationFields<>(entity, settings);
+        this.tableClass = entityClass;
+        this.jpaSettings = settings;
     }
 
     public TableEntity(E entity, JpaSettings settings) {
         this.entity = entity;
-        new EntityValidator<>(entity).validate();
-
         this.id = extractId(settings);
-        this.tableClass = entity.getClass();
-        this.tableName = extractTableName(tableClass, settings);
-        this.jpaSettings = settings;
-
+        this.entityMeta = new EntityMeta(entity, settings);
         this.tableFields = new TableFields<>(entity, settings);
         this.relationFields = new RelationFields<>(entity, settings);
+        this.tableClass = entity.getClass();
+        this.jpaSettings = settings;
     }
 
     public TableEntity(Class<E> entityClass) {
@@ -83,7 +79,7 @@ public class TableEntity<E> {
     }
 
     public String getTableName() {
-        return tableName;
+        return entityMeta.getTableName();
     }
 
     public TablePrimaryField getId() {
@@ -163,7 +159,7 @@ public class TableEntity<E> {
         }
     }
 
-    public RelationFields getRelationFields() {
+    public RelationFields<E> getRelationFields() {
         return this.relationFields;
     }
 
@@ -184,10 +180,6 @@ public class TableEntity<E> {
         }
     }
 
-    private String extractTableName(Class<?> entityClass, JpaSettings settings) {
-        return settings.getNamingStrategy().namingTable(entityClass);
-    }
-
     /**
      * 엔티티로부터 ID 추출
      *
@@ -202,7 +194,7 @@ public class TableEntity<E> {
 
     public TableEntity<E> addAliasIfNotAssigned() {
         if(this.alias == null) {
-            this.alias = new TableAlias(tableName);
+            this.alias = new TableAlias(this.getTableName());
         }
 
         return this;
