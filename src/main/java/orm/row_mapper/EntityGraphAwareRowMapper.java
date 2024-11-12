@@ -25,10 +25,10 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
 
     private final Class<T> type;
     private final TableEntity<T> tableEntity;
-    private final RelationFields relationFields;
+    private final RelationFields<T> relationFields;
     private final Map<Object, T> resultIdMap;
 
-    public EntityGraphAwareRowMapper(TableEntity<T> tableEntity, RelationFields relationFields) {
+    public EntityGraphAwareRowMapper(TableEntity<T> tableEntity, RelationFields<T> relationFields) {
         this.type = tableEntity.getTableClass();
         this.tableEntity = tableEntity;
         this.relationFields = relationFields;

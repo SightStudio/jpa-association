@@ -25,14 +25,14 @@ public abstract class SelectImpl<E> implements SelectFromStep<E> {
     private final Conditions conditions;
 
     // join에 사용될 연관관계
-    private RelationFields relationFields;
+    private RelationFields<E> relationFields;
     private boolean hasJoin;
 
     public SelectImpl(TableEntity<E> tableEntity, QueryRunner queryRunner) {
         this.tableEntity = tableEntity;
         this.queryRunner = queryRunner;
         this.conditions = new Conditions();
-        this.relationFields = new RelationFields();
+        this.relationFields = new RelationFields<>();
         this.hasJoin = false;
     }
 
