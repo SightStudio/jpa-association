@@ -4,7 +4,7 @@
 
 - [X] Select Join 절 만들기
 - [X] Fetcher에 연관 엔티티 추가 
-- [ ] Save 시 Insert Query 추가
+- [x] Save 시 Insert Query 추가
 
 ### 요구 사항 1
 - 요구 사항 1 - Select Join Query 만들기 (EAGER)
