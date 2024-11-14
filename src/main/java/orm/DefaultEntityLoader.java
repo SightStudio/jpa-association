@@ -25,7 +25,7 @@ public class DefaultEntityLoader implements EntityLoader {
         }
 
         return queryBuilder.selectFrom(tableEntity, queryRunner)
-                .joinAll()
+                .whereWithId(id)
                 .fetchOne();
     }
 
