@@ -95,19 +95,15 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
      * @param entityFieldMeta 엔티티 필드
      */
     private void mapToManyRelation(ResultSet rs, T rootEntity, EntityFieldMeta entityFieldMeta) {
-        try {
-            Field relationField = entityFieldMeta.field();
-            List<Object> list = (List<Object>) relationField.get(rootEntity);
-            if (list == null) {
-                list = new ArrayList<>();
-                ReflectionUtils.setFieldValue(relationField, rootEntity, list);
-            }
-
-            Class<?> relationClass = ReflectionUtils.extractGenericSignature(relationField);
-            list.add(createRelationEntityInstance(rs, relationClass));
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        final Field relationField = entityFieldMeta.field();
+        List<Object> list = (List<Object>) ReflectionUtils.getFieldValueFromObject(rootEntity, relationField);
+        if (list == null) {
+            list = new ArrayList<>();
+            ReflectionUtils.setFieldValue(relationField, rootEntity, list);
         }
+
+        Class<?> relationClass = ReflectionUtils.extractGenericSignature(relationField);
+        list.add(createRelationEntityInstance(rs, relationClass));
     }
 
     // 연관관계 엔티티에 대한 값을 매핑
