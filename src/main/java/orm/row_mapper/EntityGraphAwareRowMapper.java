@@ -50,6 +50,7 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
 
             T entity = mapRowIntoEntity(rs, idValue);
 
+            // rs.next는 여기서만 호출된다.
             while (rs.next()) {
                 Object newIdValue = rs.getObject(idFieldName);
                 if (newIdValue.equals(idValue)) {
