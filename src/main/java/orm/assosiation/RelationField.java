@@ -9,7 +9,9 @@ import orm.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 
+import static java.util.function.Predicate.not;
 import static orm.util.ReflectionUtils.extractGenericSignature;
 
 public class RelationField {
@@ -44,13 +46,13 @@ public class RelationField {
     }
 
     public static RelationField ofOneToManyRelation(Object entity, Field field, JpaSettings settings) {
-        var tableEntity = new TableEntity<>(extractGenericSignature(field), settings)
-                .addAliasIfNotAssigned();
+        final var tableEntity = new TableEntity<>(extractGenericSignature(field), settings).addAliasIfNotAssigned();
+        final var idField = tableEntity.getId();
 
-        OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        String joinColumnName = field.isAnnotationPresent(JoinColumn.class)
-                ? field.getAnnotation(JoinColumn.class).name()
-                : tableEntity.getId().getFieldName();
+        final OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+        final String joinColumnName = Optional.ofNullable(field.getAnnotation(JoinColumn.class).name())
+                .filter(not(String::isBlank))
+                .orElse(idField.getFieldName());
 
         Object value = ReflectionUtils.getFieldValueFromObject(entity, field);
 

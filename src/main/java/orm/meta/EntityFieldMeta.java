@@ -89,10 +89,6 @@ public final class EntityFieldMeta {
         return field;
     }
 
-    public Class<?> getDeclaringClass() {
-        return field.getDeclaringClass();
-    }
-
     private String extractFieldName(Field field) {
         Column column = field.getAnnotation(Column.class);
         return jpaSettings.getNamingStrategy().namingColumn(column, field);

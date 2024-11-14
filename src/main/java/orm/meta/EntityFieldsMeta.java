@@ -27,10 +27,6 @@ public class EntityFieldsMeta {
                 .toList();
     }
 
-    public List<EntityFieldMeta> getEntityFieldMetaList() {
-        return entityFieldMetaList;
-    }
-
     public List<EntityFieldMeta> getNonRelationFields() {
         return entityFieldMetaList.stream()
                 .filter(meta -> !meta.isRelationAnnotation())

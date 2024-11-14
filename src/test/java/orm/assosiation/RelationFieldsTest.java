@@ -1,12 +1,16 @@
 package orm.assosiation;
 
+import jakarta.persistence.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import orm.TableFields;
 import persistence.sql.ddl.Order;
 import persistence.sql.ddl.OrderItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RelationFieldsTest {
@@ -86,4 +90,41 @@ class RelationFieldsTest {
         // then
         assertTrue(relationFields.hasRelation());
     }
+
+    @Test
+    @DisplayName("RelationFields는 Join 컬럼명이 없는 경우 연관관계 테이블의 Id를 사용한다.")
+    void join컬럼_명시안된_필드_테스트() {
+        // given
+        var order = new Order_조인컬럼_없는_경우();
+
+        // when
+        var relationFields = new RelationFields<>(order);
+
+        // then
+        List<RelationField> relationList = relationFields.getRelationList();
+        assertSoftly(softly -> {
+            assertThat(relationList).hasSize(1);
+            assertThat(relationList.getFirst().getJoinColumnName()).isEqualTo("id");
+        });
+    }
 }
+
+
+@Entity
+@Table(name = "orders_x")
+class Order_조인컬럼_없는_경우{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "")
+    public List<OrderItem> orderItems;
+
+    public Order_조인컬럼_없는_경우() {
+
+    }
+}
+
+
