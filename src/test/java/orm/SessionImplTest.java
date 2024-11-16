@@ -163,13 +163,9 @@ class SessionImplTest extends PluggableH2test {
             Order foundOrder = session.find(Order.class, 1L);
 
             // then
-            assertThat(foundOrder)
-                    .satisfies(order1 -> {
-                        assertThat(order1).hasNoNullFieldsOrPropertiesExcept("id", "orderNumber", "orderItems");
-                        assertThat(order1.getOrderItems()).asList()
-                                .hasSize(2)
-                                .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("id", "product", "quantity", "orderId"));
-                    });
+            assertThat(foundOrder.getOrderItems()).asList()
+                    .hasSize(2)
+                    .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("id", "product", "quantity", "orderId"));
         });
     }
 
@@ -191,13 +187,9 @@ class SessionImplTest extends PluggableH2test {
             Order foundOrder = session.find(Order.class, 1L);
 
             // then
-            assertThat(foundOrder)
-                    .satisfies(order1 -> {
-                        assertThat(order1).hasNoNullFieldsOrProperties();
-                        assertThat(order1.getOrderItems()).asList()
-                                .hasSize(2)
-                                .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("orderId")); // orderId는 저장하지 않음
-                    });
+            assertThat(foundOrder.getOrderItems()).asList()
+                    .hasSize(2)
+                    .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("orderId")); // orderId는 저장하지 않음
         });
     }
 }

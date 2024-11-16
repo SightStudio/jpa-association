@@ -2,6 +2,8 @@ package orm.meta;
 
 import jakarta.persistence.*;
 import orm.ColumnMeta;
+import orm.exception.NotYetImplementedException;
+import orm.exception.RelationAnnotationNotFoundException;
 import orm.settings.JpaSettings;
 
 import java.lang.reflect.Field;
@@ -37,7 +39,7 @@ public final class EntityFieldMeta {
         return isTransientAnnotated() && isColumnAnnotated();
     }
 
-    public boolean isRelationAnnotation() {
+    public boolean hasRelationAnnotation() {
         return isOneToOneAssociated() || isOneToManyAssociated() || isManyToOneAssociated() || isManyToManyAssociated();
     }
 
@@ -83,6 +85,18 @@ public final class EntityFieldMeta {
 
     public Field getField() {
         return field;
+    }
+
+    public FetchType getFetchType() {
+        if (!this.hasRelationAnnotation()) {
+            throw new RelationAnnotationNotFoundException("%s는 연관관계 필드가 아닙니다.".formatted(field.getName()));
+        }
+
+        if(isOneToManyAssociated()) {
+            return field.getAnnotation(OneToMany.class).fetch();
+        }
+
+        throw new NotYetImplementedException("getFetchType()에서 OneToMany를 제외한 나머지는 구현되지 않았습니다.");
     }
 
     private String extractFieldName(Field field) {

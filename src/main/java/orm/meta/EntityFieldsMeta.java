@@ -29,7 +29,7 @@ public class EntityFieldsMeta {
 
     public List<EntityFieldMeta> getNonRelationFields() {
         return entityFieldMetaList.stream()
-                .filter(meta -> !meta.isRelationAnnotation())
+                .filter(meta -> !meta.hasRelationAnnotation())
                 .toList();
     }
 

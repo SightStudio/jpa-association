@@ -1,1 +1,0 @@
-package persistence.sql.ddl;

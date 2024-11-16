@@ -108,7 +108,7 @@ public class TableFields<E> {
             }
 
             // 연관관계 필드 무시
-            if (entityProperty.isRelationAnnotation()) {
+            if (entityProperty.hasRelationAnnotation()) {
                 continue;
             }
 

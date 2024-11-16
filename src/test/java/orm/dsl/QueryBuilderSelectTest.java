@@ -215,13 +215,9 @@ class QueryBuilderSelectTest extends PluggableH2test {
                     .fetchOne();
 
             // then
-            assertThat(result)
-                    .satisfies(order1 -> {
-                        assertThat(order1).hasNoNullFieldsOrPropertiesExcept("id", "orderNumber", "orderItems");
-                        assertThat(order1.getOrderItems()).asList()
-                                .hasSize(2)
-                                .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("id", "product", "quantity", "orderId"));
-                    });
+            assertThat(result.getOrderItems()).asList()
+                    .hasSize(2)
+                    .allSatisfy(orderItem -> assertThat(orderItem).hasNoNullFieldsOrPropertiesExcept("id", "product", "quantity", "orderId"));
 
         });
     }

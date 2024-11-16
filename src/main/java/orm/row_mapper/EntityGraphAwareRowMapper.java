@@ -1,10 +1,8 @@
 package orm.row_mapper;
 
 import jdbc.RowMapper;
-import orm.EntityLoader;
 import orm.TableEntity;
 import orm.TableField;
-import orm.assosiation.RelationField;
 import orm.assosiation.RelationFields;
 import orm.exception.RowMapperException;
 import orm.meta.EntityFieldMeta;
@@ -77,18 +75,31 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
 
         // 루트 엔티티 부재시 생성
         T rootEntity = resultIdMap.computeIfAbsent(idValue, id ->
-                new EntityMapper<>(rs, rootTableEntity).createEntityInstance()
+                new EntityMapper<>(rs, rootTableEntity).createEntity()
         );
 
         // 관련된 연관 엔티티 매핑
-        rootEntityFieldsMeta.getOneToManyRelationFields()
-                .forEach(meta -> mapToManyRelation(rs, rootEntity, meta));
+        handleOneToMany(rootEntity, rs);
 
         return rootEntity;
     }
 
+    private void handleOneToMany(T rootEntity, ResultSet rs) {
+        List<EntityFieldMeta> oneToManyRelations = rootEntityFieldsMeta.getOneToManyRelationFields();
+        for (EntityFieldMeta meta : oneToManyRelations) {
+            switch (meta.getFetchType()) {
+                case EAGER:
+                    mapToManyRelation(rs, rootEntity, meta);
+                    break;
+                case LAZY:
+                    attachLazyLoaderProxy(rootEntity, meta);
+                    break;
+            }
+        }
+    }
+
     /**
-     * 연관관계 필드를 매핑한다.
+     * EAGER연관관계 필드를 매핑한다.
      * OneToMany 연관관계는 루트 엔티티에 List를 생성하고, 하나의 row단위로만 연관관계를 세팅한다.
      *
      * @param rs              ResultSet
@@ -103,15 +114,15 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
             ReflectionUtils.setFieldValue(relationField, rootEntity, list);
         }
 
+        // 연관관계 엔티티에 대한 값을 매핑
         Class<?> relationClass = ReflectionUtils.extractGenericSignature(relationField);
-        list.add(createRelationEntityInstance(rs, relationClass));
+        TableEntity<?> joinTableEntity = relationFields.getRelationFieldsOfType(relationClass).getJoinTableEntity();
+        var entityMapper = new EntityMapper<>(rs, joinTableEntity);
+        list.add(entityMapper.createEntity());
     }
 
-    // 연관관계 엔티티에 대한 값을 매핑
-    public Object createRelationEntityInstance(ResultSet rs, Class<?> relationClass) {
-        RelationField relationField = relationFields.getRelationFieldsOfType(relationClass);
-        TableEntity<?> joinTableEntity = relationField.getJoinTableEntity();
-        return new EntityMapper<>(rs, joinTableEntity).createEntityInstance();
+    private void attachLazyLoaderProxy(T rootEntity, EntityFieldMeta meta) {
+
     }
 
     /**
@@ -129,7 +140,7 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
         }
 
         // 루트 엔티티에 대한 값을 매핑
-        public T createEntityInstance() {
+        public T createEntity() {
             Class<T> tableClass = tableEntity.getTableClass();
             try {
                 T entity = tableClass.getDeclaredConstructor().newInstance();

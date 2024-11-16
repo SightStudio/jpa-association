@@ -3,6 +3,7 @@ package orm.assosiation;
 import jakarta.persistence.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import orm.meta.EntityFieldsMeta;
 import persistence.sql.ddl.Order;
 import persistence.sql.ddl.OrderItem;
 
@@ -20,13 +21,14 @@ class RelationFieldsTest {
     void getRelationList() {
         // given
         Order order = new Order("12131");
+        EntityFieldsMeta order_메타 = new EntityFieldsMeta(order.getClass());
 
         // when
         var relationFields = new RelationFields<>(order);
 
         // then
         assertThat(relationFields.getRelationList())
-                .hasSize(1); // oneToMany 필드 1
+                .hasSize(order_메타.getOneToManyRelationFields().size());
     }
 
     @Test
