@@ -16,13 +16,7 @@ public interface PersistenceContext {
 
     <T> Object getDatabaseSnapshot(EntityIdHolder<T> idHolder, EntityPersister entityPersister);
 
-    <T> EntityEntry getEntry(EntityIdHolder<T> idHolder);
-
-    EntityEntry getEntry(Object entity);
-
     EntityEntry addEntry(Object entity, Status status);
 
     EntityEntry addEntry(EntityKey entityKey, Status status);
-
-    void removeEntry(EntityKey entityKey);
 }

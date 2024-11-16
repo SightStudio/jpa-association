@@ -32,8 +32,4 @@ public class EntityEntryContext {
     public EntityEntry getEntry(EntityKey entityKey) {
         return entryMap.get(entityKey);
     }
-
-    public void removeEntry(EntityKey entityKey) {
-        entryMap.remove(entityKey);
-    }
 }

@@ -80,18 +80,6 @@ public class StatefulPersistenceContext implements PersistenceContext {
     }
 
     @Override
-    public <T> EntityEntry getEntry(EntityIdHolder<T> idHolder) {
-        var entityKey = new EntityKey(idHolder);
-        return entryContext.getEntry(entityKey);
-    }
-
-    @Override
-    public EntityEntry getEntry(Object entity) {
-        var idHolder = new EntityIdHolder<>(entity);
-        return this.getEntry(idHolder);
-    }
-
-    @Override
     public EntityEntry addEntry(Object entity, Status status) {
         var idHolder = new EntityIdHolder<>(entity);
         return this.addEntry(new EntityKey(idHolder), status);
@@ -113,11 +101,6 @@ public class StatefulPersistenceContext implements PersistenceContext {
 
         // 상태가 다르면 추가
         return entryContext.addEntry(entityKey, status);
-    }
-
-    @Override
-    public void removeEntry(EntityKey entityKey) {
-        entryContext.removeEntry(entityKey);
     }
 
     private <T> T castEntity(Class<T> clazz, Object persistedEntity) {
