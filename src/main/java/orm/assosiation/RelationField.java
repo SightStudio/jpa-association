@@ -50,7 +50,8 @@ public class RelationField {
         final var idField = tableEntity.getId();
 
         final OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-        final String joinColumnName = Optional.ofNullable(field.getAnnotation(JoinColumn.class).name())
+        final String joinColumnName = Optional.ofNullable(field.getAnnotation(JoinColumn.class))
+                .map(JoinColumn::name)
                 .filter(not(String::isBlank))
                 .orElse(idField.getFieldName());
 
