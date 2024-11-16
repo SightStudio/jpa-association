@@ -49,10 +49,6 @@ public final class EntityFieldMeta {
         return classFieldName;
     }
 
-    public Field field() {
-        return field;
-    }
-
     public boolean isTransientAnnotated() {
         return field.isAnnotationPresent(Transient.class);
     }

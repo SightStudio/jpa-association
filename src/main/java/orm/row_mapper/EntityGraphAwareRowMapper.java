@@ -1,6 +1,7 @@
 package orm.row_mapper;
 
 import jdbc.RowMapper;
+import orm.EntityLoader;
 import orm.TableEntity;
 import orm.TableField;
 import orm.assosiation.RelationField;
@@ -95,7 +96,7 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
      * @param entityFieldMeta 엔티티 필드
      */
     private void mapToManyRelation(ResultSet rs, T rootEntity, EntityFieldMeta entityFieldMeta) {
-        final Field relationField = entityFieldMeta.field();
+        final Field relationField = entityFieldMeta.getField();
         List<Object> list = (List<Object>) ReflectionUtils.getFieldValueFromObject(rootEntity, relationField);
         if (list == null) {
             list = new ArrayList<>();
@@ -108,15 +109,9 @@ public class EntityGraphAwareRowMapper<T> implements RowMapper<T> {
 
     // 연관관계 엔티티에 대한 값을 매핑
     public Object createRelationEntityInstance(ResultSet rs, Class<?> relationClass) {
-        try {
-            RelationField relationField = relationFields.getRelationFieldsOfType(relationClass);
-            TableEntity<?> joinTableEntity = relationField.getJoinTableEntity();
-
-            return new EntityMapper<>(rs, joinTableEntity)
-                    .createEntityInstance();
-        } catch (Exception e) {
-            throw new RowMapperException("Failed to create new instance of " + relationClass.getName(), e);
-        }
+        RelationField relationField = relationFields.getRelationFieldsOfType(relationClass);
+        TableEntity<?> joinTableEntity = relationField.getJoinTableEntity();
+        return new EntityMapper<>(rs, joinTableEntity).createEntityInstance();
     }
 
     /**
